@@ -13,19 +13,35 @@ class PlanStorageService {
   // Tüm planları getir
   Future<List<Plan>> getAllPlans() async {
     try {
+      print('🔍 Plan Storage: SharedPreferences erişimi başlatılıyor...');
       final prefs = await SharedPreferences.getInstance();
       final plansJson = prefs.getStringList(_plansKey) ?? [];
       
-      List<Plan> plans = plansJson
-          .map((planJson) => Plan.fromJsonString(planJson))
-          .toList();
+      print('🔍 Plan Storage: SharedPreferences\'tan ${plansJson.length} plan JSON\'ı bulundu');
+      
+      if (plansJson.isEmpty) {
+        print('⚠️ Plan Storage: Hiç plan bulunamadı!');
+        return [];
+      }
+      
+      List<Plan> plans = [];
+      for (int i = 0; i < plansJson.length; i++) {
+        try {
+          final plan = Plan.fromJsonString(plansJson[i]);
+          plans.add(plan);
+          print('✅ Plan Storage: Plan ${i + 1} başarıyla yüklendi: ${plan.title}');
+        } catch (e) {
+          print('❌ Plan Storage: Plan ${i + 1} yüklenirken hata: $e');
+        }
+      }
       
       // Kronolojik sıralama (en yeni en üstte)
       plans.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       
+      print('📊 Plan Storage: Toplam ${plans.length} plan başarıyla yüklendi');
       return plans;
     } catch (e) {
-      print('Plan okuma hatası: $e');
+      print('❌ Plan Storage: Plan okuma hatası: $e');
       return [];
     }
   }

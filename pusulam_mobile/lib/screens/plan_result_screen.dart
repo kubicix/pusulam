@@ -711,10 +711,12 @@ class _PlanResultScreenState extends State<PlanResultScreen>
   Future<void> _savePlanToStorage() async {
     try {
       // Plan verilerinden gerekli bilgileri çıkar
-      final planTitle = widget.planData['hedef'] as String? ?? 'Yeni Plan';
       final planTheme = widget.planData['tema'] as String? ?? 'genel';
       final planDuration = widget.planData['sure'] as String? ?? '1 hafta';
       final planDailyTime = widget.planData['gunluk_zaman'] as String? ?? '1 saat';
+      
+      // Akıllı başlık oluşturma
+      final planTitle = _generateSmartTitle(widget.planData, planTheme, planDuration);
       
       // Plan açıklamasını oluştur
       final planDescription = widget.planData['aciklama'] as String? ?? 
@@ -766,5 +768,101 @@ class _PlanResultScreenState extends State<PlanResultScreen>
         );
       }
     }
+  }
+
+  /// Planın içeriğinden akıllı başlık oluşturur
+  String _generateSmartTitle(Map<String, dynamic> planData, String theme, String duration) {
+    // Önce hedef alanını kontrol et
+    final hedef = planData['hedef'] as String?;
+    if (hedef != null && hedef.trim().isNotEmpty && hedef.trim() != 'Yeni Plan') {
+      return hedef.trim();
+    }
+
+    // Plan başlığı alanını kontrol et
+    final planTitle = planData['plan_title'] as String?;
+    if (planTitle != null && planTitle.trim().isNotEmpty && planTitle.trim() != 'Yeni Plan') {
+      return planTitle.trim();
+    }
+
+    // Açıklama alanından ilk cümleyi al
+    final aciklama = planData['aciklama'] as String?;
+    if (aciklama != null && aciklama.trim().isNotEmpty) {
+      final firstSentence = aciklama.split('.').first.trim();
+      if (firstSentence.length > 10 && firstSentence.length < 80) {
+        return firstSentence;
+      }
+    }
+
+    // Günlük rutinlerden başlık oluştur
+    final gunlukRutinler = planData['gunluk_rutinler'];
+    if (gunlukRutinler is List && gunlukRutinler.isNotEmpty) {
+      final firstRoutine = gunlukRutinler.first;
+      if (firstRoutine is String && firstRoutine.trim().length > 10) {
+        final title = firstRoutine.trim();
+        if (title.length > 50) {
+          return '${title.substring(0, 47)}...';
+        }
+        return title;
+      }
+    }
+
+    // Öneriler alanından başlık oluştur
+    final oneriler = planData['oneriler'];
+    if (oneriler is List && oneriler.isNotEmpty) {
+      final firstSuggestion = oneriler.first;
+      if (firstSuggestion is String && firstSuggestion.trim().length > 10) {
+        final title = firstSuggestion.trim();
+        if (title.length > 50) {
+          return '${title.substring(0, 47)}...';
+        }
+        return title;
+      }
+    }
+
+    // Haftalık planlardan başlık oluştur
+    final haftalikPlan = planData['haftalik_plan'];
+    if (haftalikPlan is Map) {
+      final firstWeek = haftalikPlan['Hafta 1'] ?? haftalikPlan['hafta_1'] ?? haftalikPlan.values.first;
+      if (firstWeek is Map) {
+        final firstDay = firstWeek.values.first;
+        if (firstDay is List && firstDay.isNotEmpty) {
+          final firstActivity = firstDay.first;
+          if (firstActivity is String && firstActivity.trim().length > 10) {
+            final title = firstActivity.trim();
+            if (title.length > 50) {
+              return '${title.substring(0, 47)}...';
+            }
+            return title;
+          }
+        }
+      }
+    }
+
+    // Motivasyon mesajlarından başlık oluştur
+    final motivasyon = planData['motivasyon_mesajlari'] ?? planData['motivasyon'];
+    if (motivasyon is List && motivasyon.isNotEmpty) {
+      final firstMotivation = motivasyon.first;
+      if (firstMotivation is String && firstMotivation.trim().length > 10) {
+        final title = firstMotivation.trim();
+        if (title.length > 50) {
+          return '${title.substring(0, 47)}...';
+        }
+        return title;
+      }
+    }
+
+    // Tema ve süreye göre varsayılan başlık oluştur
+    final themeMap = {
+      'eğitim': 'Eğitim Planı',
+      'sağlık': 'Sağlık Planı', 
+      'sürdürülebilirlik': 'Sürdürülebilirlik Planı',
+      'turizm': 'Turizm Planı',
+      'genel': 'Kişisel Plan',
+    };
+
+    final themeTitle = themeMap[theme.toLowerCase()] ?? 'Kişisel Plan';
+    final cleanDuration = duration.replaceAll('hafta', '').trim();
+    
+    return '$cleanDuration Haftalık $themeTitle';
   }
 }
