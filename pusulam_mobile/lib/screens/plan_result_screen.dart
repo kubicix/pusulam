@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../themes/app_themes.dart';
+import '../models/plan.dart';
+import '../services/plan_storage_service.dart';
 
 class PlanResultScreen extends StatefulWidget {
   final Map<String, dynamic> planData;
@@ -23,6 +25,8 @@ class _PlanResultScreenState extends State<PlanResultScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  final _storageService = PlanStorageService();
+  bool _isPlanSaved = false;
 
   @override
   void initState() {
@@ -50,6 +54,9 @@ class _PlanResultScreenState extends State<PlanResultScreen>
     ));
     
     _animationController.forward();
+    
+    // Planı otomatik olarak kaydet
+    _savePlanToStorage();
   }
 
   @override
@@ -73,6 +80,10 @@ class _PlanResultScreenState extends State<PlanResultScreen>
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context, true), // Plan kaydedildiğini belirt
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
@@ -615,7 +626,6 @@ class _PlanResultScreenState extends State<PlanResultScreen>
   }
 
   void _sharePlan() {
-    final planText = _generatePlanText();
     // Share özelliği için share_plus paketi gerekli
     // Şimdilik kopyala fonksiyonunu kullanıyoruz
     _copyPlanToClipboard();
@@ -696,5 +706,65 @@ class _PlanResultScreenState extends State<PlanResultScreen>
     buffer.writeln('Timestamp: ${widget.timestamp}');
 
     return buffer.toString();
+  }
+
+  Future<void> _savePlanToStorage() async {
+    try {
+      // Plan verilerinden gerekli bilgileri çıkar
+      final planTitle = widget.planData['hedef'] as String? ?? 'Yeni Plan';
+      final planTheme = widget.planData['tema'] as String? ?? 'genel';
+      final planDuration = widget.planData['sure'] as String? ?? '1 hafta';
+      final planDailyTime = widget.planData['gunluk_zaman'] as String? ?? '1 saat';
+      
+      // Plan açıklamasını oluştur
+      final planDescription = widget.planData['aciklama'] as String? ?? 
+          '${planTheme.toUpperCase()} temalı kişiselleştirilmiş plan';
+      
+      // Plan içeriğini oluştur
+      final planContent = _generatePlanText();
+      
+      // Benzersiz ID oluştur
+      final planId = '${DateTime.now().millisecondsSinceEpoch}_${planTitle.hashCode}';
+      
+      // Plan nesnesi oluştur
+      final plan = Plan(
+        id: planId,
+        title: planTitle,
+        description: planDescription,
+        theme: planTheme,
+        duration: planDuration,
+        dailyTime: planDailyTime,
+        content: planContent,
+        createdAt: DateTime.now(),
+      );
+      
+      // Local storage'a kaydet
+      final success = await _storageService.savePlan(plan);
+      
+      if (success) {
+        setState(() => _isPlanSaved = true);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Plan başarıyla kaydedildi!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Plan kaydetme hatası: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Plan kaydedilemedi: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 }
