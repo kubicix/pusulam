@@ -711,15 +711,15 @@ class _PlanResultScreenState extends State<PlanResultScreen>
   Future<void> _savePlanToStorage() async {
     try {
       // Plan verilerinden gerekli bilgileri çıkar
-      final planTheme = widget.planData['tema'] as String? ?? 'genel';
-      final planDuration = widget.planData['sure'] as String? ?? '1 hafta';
-      final planDailyTime = widget.planData['gunluk_zaman'] as String? ?? '1 saat';
+      final planTheme = widget.planData['theme'] as String? ?? 'genel';
+      final planDuration = widget.planData['duration'] as String? ?? '1 hafta';
+      final planDailyTime = widget.planData['daily_time'] as String? ?? '1 saat';
       
       // Akıllı başlık oluşturma
       final planTitle = _generateSmartTitle(widget.planData, planTheme, planDuration);
       
       // Plan açıklamasını oluştur
-      final planDescription = widget.planData['aciklama'] as String? ?? 
+      final planDescription = widget.planData['goal'] as String? ?? 
           '${planTheme.toUpperCase()} temalı kişiselleştirilmiş plan';
       
       // Plan içeriğini oluştur

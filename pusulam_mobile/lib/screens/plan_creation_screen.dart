@@ -571,11 +571,14 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
     try {
       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
       
+      // Tema değerini belirle
+      final selectedTheme = _useCustomTheme 
+          ? _customThemeController.text.trim()
+          : _selectedTheme!;
+
       final planRequest = {
         'goal': _goalController.text.trim(),
-        'theme': _useCustomTheme 
-            ? _customThemeController.text.trim()
-            : _selectedTheme!,
+        'theme': selectedTheme,
         'duration': '$_weekCount hafta',
         'daily_time': '$_dailyHours saat',
       };
@@ -592,11 +595,18 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
 
       if (mounted) {
         if (response['success'] == true) {
+          // Plan verisine tema bilgisini ekle
+          final planDataWithTheme = Map<String, dynamic>.from(response['generated_plan']);
+          planDataWithTheme['theme'] = selectedTheme;
+          planDataWithTheme['goal'] = _goalController.text.trim();
+          planDataWithTheme['duration'] = '$_weekCount hafta';
+          planDataWithTheme['daily_time'] = '$_dailyHours saat';
+          
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PlanResultScreen(
-                planData: response['generated_plan'],
+                planData: planDataWithTheme,
                 timestamp: response['timestamp'],
               ),
             ),
