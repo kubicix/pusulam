@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
@@ -628,18 +629,45 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
   }
 
   Future<void> _simulateProgress() async {
-    const stepDuration = Duration(milliseconds: 2000); // Her adım 2 saniye
+    const stepDuration = Duration(milliseconds: 3000); // Her adım 3 saniye
     
     for (int i = 0; i < _loadingSteps.length; i++) {
       setState(() {
         _currentStep = i;
-        _progress = (i + 1) / _loadingSteps.length * 0.9; // %90'a kadar
       });
       
+      // Her adım için animasyonlu progress artırma
+      final targetProgress = (i + 1) / _loadingSteps.length * 0.9; // %90'a kadar
+      await _animateProgress(targetProgress, stepDuration);
+      
+      // Son adım değilse biraz bekle
       if (i < _loadingSteps.length - 1) {
-        await Future.delayed(stepDuration);
+        await Future.delayed(const Duration(milliseconds: 200));
       }
     }
+  }
+
+  Future<void> _animateProgress(double targetProgress, Duration duration) async {
+    final startProgress = _progress;
+    final progressDifference = targetProgress - startProgress;
+    const frameRate = 60; // 60 FPS
+    final totalFrames = (duration.inMilliseconds / (1000 / frameRate)).round();
+    
+    for (int frame = 0; frame <= totalFrames; frame++) {
+      final animationProgress = frame / totalFrames;
+      // Easing function - yavaş başla, hızlan, sonra yavaşla
+      final easedProgress = _easeInOutCubic(animationProgress);
+      
+      setState(() {
+        _progress = startProgress + (progressDifference * easedProgress);
+      });
+      
+      await Future.delayed(Duration(milliseconds: (1000 / frameRate).round()));
+    }
+  }
+
+  double _easeInOutCubic(double t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - pow(-2 * t + 2, 3) / 2;
   }
 
   void _showLoadingDialog() {
@@ -677,25 +705,48 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Ana icon
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: themeProvider.seedColor,
-                          borderRadius: BorderRadius.circular(50),
-                          boxShadow: [
-                            BoxShadow(
-                              color: themeProvider.seedColor.withOpacity(0.3),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
+                      // Ana icon - Pulse animasyonu
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 1500),
+                        tween: Tween<double>(begin: 1.0, end: 1.1),
+                        curve: Curves.easeInOut,
+                        builder: (context, scale, child) {
+                          return Transform.scale(
+                            scale: scale,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: themeProvider.seedColor,
+                                borderRadius: BorderRadius.circular(50),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: themeProvider.seedColor.withOpacity(0.3),
+                                    blurRadius: 15 * scale,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                  BoxShadow(
+                                    color: themeProvider.seedColor.withOpacity(0.1),
+                                    blurRadius: 30 * scale,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.auto_awesome,
+                                color: Colors.white,
+                                size: 32,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 32,
-                        ),
+                          );
+                        },
+                        onEnd: () {
+                          // Animasyonu tekrarla
+                          Future.microtask(() {
+                            if (mounted) {
+                              setDialogState(() {});
+                            }
+                          });
+                        },
                       ),
                       
                       const SizedBox(height: 24),
@@ -725,26 +776,42 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                       
                       const SizedBox(height: 32),
                       
-                      // Circular Progress Indicator
+                      // Circular Progress Indicator - Animasyonlu
                       Stack(
                         alignment: Alignment.center,
                         children: [
                           SizedBox(
                             width: 80,
                             height: 80,
-                            child: CircularProgressIndicator(
-                              value: _progress,
-                              strokeWidth: 6,
-                              backgroundColor: themeProvider.seedColor.withOpacity(0.2),
-                              color: themeProvider.seedColor,
+                            child: TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              tween: Tween<double>(
+                                begin: 0,
+                                end: _progress,
+                              ),
+                              builder: (context, value, _) => CircularProgressIndicator(
+                                value: value,
+                                strokeWidth: 6,
+                                backgroundColor: themeProvider.seedColor.withOpacity(0.2),
+                                color: themeProvider.seedColor,
+                                strokeCap: StrokeCap.round,
+                              ),
                             ),
                           ),
-                          Text(
-                            '${(_progress * 100).toInt()}%',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: themeProvider.seedColor,
+                          TweenAnimationBuilder<int>(
+                            duration: const Duration(milliseconds: 300),
+                            tween: IntTween(
+                              begin: 0,
+                              end: (_progress * 100).toInt(),
+                            ),
+                            builder: (context, value, _) => Text(
+                              '$value%',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: themeProvider.seedColor,
+                              ),
                             ),
                           ),
                         ],
@@ -752,7 +819,7 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                       
                       const SizedBox(height: 32),
                       
-                      // Linear Progress Bar
+                      // Linear Progress Bar - Animasyonlu
                       Container(
                         width: double.infinity,
                         height: 8,
@@ -760,18 +827,32 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                           color: themeProvider.seedColor.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: _progress,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  themeProvider.seedColor,
-                                  themeProvider.seedColor.withOpacity(0.8),
-                                ],
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: double.infinity,
+                            child: FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: _progress,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      themeProvider.seedColor,
+                                      themeProvider.seedColor.withOpacity(0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: themeProvider.seedColor.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(4),
                             ),
                           ),
                         ),
@@ -779,8 +860,10 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                       
                       const SizedBox(height: 24),
                       
-                      // Adım indicator
-                      Container(
+                      // Adım indicator - Animasyonlu
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -790,14 +873,29 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                             color: themeProvider.seedColor.withOpacity(0.2),
                             width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: themeProvider.seedColor.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
-                            Container(
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: themeProvider.seedColor,
                                 borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: themeProvider.seedColor.withOpacity(0.4),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Text(
                                 '${_currentStep + 1}',
@@ -810,14 +908,18 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                _currentStep < _loadingSteps.length 
-                                    ? _loadingSteps[_currentStep]
-                                    : 'Tamamlanıyor...',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: themeProvider.seedColor.withOpacity(0.8),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: Text(
+                                  _currentStep < _loadingSteps.length 
+                                      ? _loadingSteps[_currentStep]
+                                      : 'Tamamlanıyor...',
+                                  key: ValueKey(_currentStep),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: themeProvider.seedColor.withOpacity(0.8),
+                                  ),
                                 ),
                               ),
                             ),
