@@ -1,0 +1,150 @@
+# Pusulam Mono-repo .gitignore
+
+# ==============================================
+# BACKEND (Python/FastAPI) - pusulam_backend/
+# ==============================================
+
+# Environment variables
+pusulam_backend/.env
+pusulam_backend/.env.local
+pusulam_backend/.env.production
+
+# Python
+pusulam_backend/__pycache__/
+pusulam_backend/*.py[cod]
+pusulam_backend/*$py.class
+pusulam_backend/*.so
+pusulam_backend/.Python
+pusulam_backend/build/
+pusulam_backend/develop-eggs/
+pusulam_backend/dist/
+pusulam_backend/downloads/
+pusulam_backend/eggs/
+pusulam_backend/.eggs/
+pusulam_backend/lib/
+pusulam_backend/lib64/
+pusulam_backend/parts/
+pusulam_backend/sdist/
+pusulam_backend/var/
+pusulam_backend/wheels/
+pusulam_backend/pip-wheel-metadata/
+pusulam_backend/share/python-wheels/
+pusulam_backend/*.egg-info/
+pusulam_backend/.installed.cfg
+pusulam_backend/*.egg
+pusulam_backend/MANIFEST
+
+# Virtual environments
+pusulam_backend/.venv/
+pusulam_backend/venv/
+pusulam_backend/ENV/
+pusulam_backend/env.bak/
+pusulam_backend/venv.bak/
+
+# ==============================================
+# MOBILE (Flutter) - pusulam_mobile/
+# ==============================================
+
+# Miscellaneous
+pusulam_mobile/*.class
+pusulam_mobile/*.log
+pusulam_mobile/*.pyc
+pusulam_mobile/*.swp
+pusulam_mobile/.DS_Store
+pusulam_mobile/.atom/
+pusulam_mobile/.buildlog/
+pusulam_mobile/.history
+pusulam_mobile/.svn/
+pusulam_mobile/migrate_working_dir/
+
+# IntelliJ related
+pusulam_mobile/*.iml
+pusulam_mobile/*.ipr
+pusulam_mobile/*.iws
+pusulam_mobile/.idea/
+
+# Flutter/Dart/Pub related
+pusulam_mobile/**/doc/api/
+pusulam_mobile/**/ios/Flutter/.last_build_id
+pusulam_mobile/.dart_tool/
+pusulam_mobile/.flutter-plugins
+pusulam_mobile/.flutter-plugins-dependencies
+pusulam_mobile/.packages
+pusulam_mobile/.pub-cache/
+pusulam_mobile/.pub/
+pusulam_mobile/build/
+
+# Android related
+pusulam_mobile/**/android/**/gradle-wrapper.jar
+pusulam_mobile/**/android/.gradle
+pusulam_mobile/**/android/captures/
+pusulam_mobile/**/android/gradlew
+pusulam_mobile/**/android/gradlew.bat
+pusulam_mobile/**/android/local.properties
+pusulam_mobile/**/android/**/GeneratedPluginRegistrant.java
+
+# iOS/XCode related
+pusulam_mobile/**/ios/**/*.mode1v3
+pusulam_mobile/**/ios/**/*.mode2v3
+pusulam_mobile/**/ios/**/*.moved-aside
+pusulam_mobile/**/ios/**/*.pbxuser
+pusulam_mobile/**/ios/**/*.perspectivev3
+pusulam_mobile/**/ios/**/*sync/
+pusulam_mobile/**/ios/**/.sconsign.dblite
+pusulam_mobile/**/ios/**/.tags*
+pusulam_mobile/**/ios/**/.vagrant/
+pusulam_mobile/**/ios/**/DerivedData/
+pusulam_mobile/**/ios/**/Icon?
+pusulam_mobile/**/ios/**/Pods/
+pusulam_mobile/**/ios/**/.symlinks/
+pusulam_mobile/**/ios/**/profile
+pusulam_mobile/**/ios/**/xcuserdata
+pusulam_mobile/**/ios/.generated/
+pusulam_mobile/**/ios/Flutter/.last_build_id
+pusulam_mobile/**/ios/Flutter/App.framework
+pusulam_mobile/**/ios/Flutter/Flutter.framework
+pusulam_mobile/**/ios/Flutter/Flutter.podspec
+pusulam_mobile/**/ios/Flutter/Generated.xcconfig
+pusulam_mobile/**/ios/Flutter/ephemeral/
+pusulam_mobile/**/ios/Flutter/app.flx
+pusulam_mobile/**/ios/Flutter/app.zip
+pusulam_mobile/**/ios/Flutter/flutter_assets/
+pusulam_mobile/**/ios/Flutter/flutter_export_environment.sh
+pusulam_mobile/**/ios/ServiceDefinitions.json
+pusulam_mobile/**/ios/Runner/GeneratedPluginRegistrant.*
+
+# ==============================================
+# GLOBAL
+# ==============================================
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+
+# Documentation builds
+docs/_build/
+
+# Backup files
+*.bak
+*.backup
