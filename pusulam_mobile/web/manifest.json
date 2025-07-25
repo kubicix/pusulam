@@ -1,6 +1,6 @@
 {
-    "name": "pusulam_mobile",
-    "short_name": "pusulam_mobile",
+    "name": "Pusulam",
+    "short_name": "Pusulam",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
