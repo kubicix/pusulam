@@ -113,4 +113,39 @@ class ChatProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  // Plan oluşturma
+  Future<Map<String, dynamic>> generatePlan(Map<String, dynamic> planRequest) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.generatePlan(planRequest);
+      _isLoading = false;
+      notifyListeners();
+      
+      if (response.success) {
+        return {
+          'success': true,
+          'generated_plan': response.data,
+          'timestamp': DateTime.now().toIso8601String(),
+        };
+      } else {
+        _errorMessage = response.message ?? 'Plan oluşturulamadı';
+        return {
+          'success': false,
+          'error': _errorMessage,
+        };
+      }
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return {
+        'success': false,
+        'error': _errorMessage,
+      };
+    }
+  }
 }

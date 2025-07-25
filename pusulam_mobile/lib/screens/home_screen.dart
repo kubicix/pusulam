@@ -5,6 +5,7 @@ import 'package:pusulam_mobile/providers/theme_provider.dart';
 import 'package:pusulam_mobile/widgets/chat_widget.dart';
 import 'package:pusulam_mobile/widgets/message_input.dart';
 import 'package:pusulam_mobile/widgets/theme_selector.dart';
+import 'plan_creation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -118,6 +119,28 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(child: ChatWidget()),
           MessageInput(),
         ],
+      ),
+      floatingActionButton: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PlanCreationScreen(),
+                ),
+              );
+            },
+            backgroundColor: themeProvider.seedColor,
+            foregroundColor: Colors.white,
+            elevation: 6,
+            icon: const Icon(Icons.auto_awesome),
+            label: const Text(
+              'Plan Oluştur',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          );
+        },
       ),
     );
   }
