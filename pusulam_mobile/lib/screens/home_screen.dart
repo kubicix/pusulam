@@ -8,7 +8,6 @@ import '../services/plan_storage_service.dart';
 import '../constants.dart';
 import 'plan_creation_screen.dart';
 import 'plan_detail_screen.dart';
-import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -74,18 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ChatScreen(),
-                ),
-              );
-            },
-            tooltip: 'Sohbet',
-          ),
           IconButton(
             icon: const Icon(Icons.palette),
             onPressed: _showThemeDialog,
@@ -327,6 +314,94 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Logo ve uygulama açıklaması
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Logo
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: themeProvider.seedColor.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/pusulam_logo.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Açıklama
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pusulam',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: themeProvider.seedColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'AI destekli kişiselleştirilmiş planlarınız',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: themeProvider.seedColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${_savedPlans.length} Plan Oluşturuldu',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: themeProvider.seedColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
           // İstatistik kartı
           Container(
             width: double.infinity,
@@ -779,31 +854,402 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showAboutDialog() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Pusulam Hakkında'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Pusulam - AI Asistan'),
-            SizedBox(height: 8),
-            Text('Sürüm: ${AppConstants.appVersion}'),
-            SizedBox(height: 8),
-            Text('Geliştirildi: Flutter & FastAPI'),
-            SizedBox(height: 8),
-            Text('Gemini AI ile güçlendirilmiştir.'),
-            SizedBox(height: 16),
-            Text(AppConstants.appDescription),
-          ],
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tamam'),
+        child: Container(
+          constraints: const BoxConstraints(
+            maxWidth: 400,
+            maxHeight: 600, // Maximum yükseklik belirle
           ),
-        ],
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                themeProvider.seedColor.withOpacity(0.05),
+                Colors.white,
+              ],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Başlık kısmı - Sabit
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  gradient: LinearGradient(
+                    colors: [
+                      themeProvider.seedColor,
+                      themeProvider.seedColor.withOpacity(0.8),
+                    ],
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.asset(
+                          'assets/images/pusulam_logo.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Pusulam',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'AI Destekli Kişisel Asistan',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // İçerik kısmı - Scrollable
+              Flexible(
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.only(left: 20, right: 16, top: 20, bottom: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Uygulama açıklaması
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: themeProvider.seedColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: themeProvider.seedColor.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.auto_awesome,
+                                      color: themeProvider.seedColor,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Neler Yapabilir?',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: themeProvider.seedColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Pusulam, yapay zeka teknolojisiyle desteklenen akıllı bir kişisel asistanınızdır. Eğitim, sağlık, sürdürülebilirlik ve turizm alanlarında kişiselleştirilmiş planlar oluşturur.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    height: 1.4,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Özellikler
+                          Text(
+                            'Özellikler',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: themeProvider.seedColor,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          
+                          ...[
+                            ('🎓', 'Eğitim Planları', 'Kişiselleştirilmiş öğrenme rotaları'),
+                            ('💪', 'Sağlık Planları', 'Beslenme ve egzersiz programları'),
+                            ('🌱', 'Sürdürülebilirlik', 'Çevre dostu yaşam önerileri'),
+                            ('✈️', 'Turizm Planları', 'Seyahat rotaları ve öneriler'),
+                          ].map((feature) => Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  feature.$1,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        feature.$2,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        feature.$3,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Teknik bilgiler
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.grey[200]!,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.grey[600],
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Teknik Bilgiler',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                ...[
+                                  ('Sürüm', AppConstants.appVersion),
+                                  ('Platform', 'Flutter & Dart'),
+                                  ('Backend', 'FastAPI & Python'),
+                                  ('AI Motor', 'Google Gemini AI'),
+                                  ('Veri Saklama', 'Yerel Depolama'),
+                                ].map((info) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 3),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        info.$1,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      Text(
+                                        info.$2,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                              ],
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 20),
+                          
+                          // Alt butonlar
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _showThemeDialog();
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: themeProvider.seedColor,
+                                    side: BorderSide(color: themeProvider.seedColor),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                  ),
+                                  icon: const Icon(Icons.palette, size: 14),
+                                  label: const Text('Tema', style: TextStyle(fontSize: 12)),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: themeProvider.seedColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                  ),
+                                  icon: const Icon(Icons.check, size: 14),
+                                  label: const Text('Tamam', style: TextStyle(fontSize: 12)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Scroll indicator - Sağ tarafta
+                    Positioned(
+                      right: 4,
+                      top: 20,
+                      bottom: 20,
+                      child: Container(
+                        width: 4,
+                        decoration: BoxDecoration(
+                          color: themeProvider.seedColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: Column(
+                          children: [
+                            // Üst ok
+                            Container(
+                              height: 12,
+                              width: 4,
+                              decoration: BoxDecoration(
+                                color: themeProvider.seedColor.withOpacity(0.6),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(2),
+                                  topRight: Radius.circular(2),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_up,
+                                size: 12,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                            
+                            // Orta alan
+                            Expanded(
+                              child: Container(
+                                width: 4,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      themeProvider.seedColor.withOpacity(0.4),
+                                      themeProvider.seedColor.withOpacity(0.2),
+                                      themeProvider.seedColor.withOpacity(0.4),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            
+                            // Alt ok
+                            Container(
+                              height: 12,
+                              width: 4,
+                              decoration: BoxDecoration(
+                                color: themeProvider.seedColor.withOpacity(0.6),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(2),
+                                  bottomRight: Radius.circular(2),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_down,
+                                size: 12,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
