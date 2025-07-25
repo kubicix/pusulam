@@ -20,14 +20,19 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
 
   // Predefined themes
   final List<String> _predefinedThemes = [
-    'eğitim',
-    'sağlık',
-    'sürdürülebilirlik',
-    'turizm',
-    'yazılım geliştirme',
-    'iş geliştirme',
-    'kişisel gelişim',
-    'sanat ve yaratıcılık',
+    'Eğitim',
+    'Sağlık',
+    'Sürdürülebilirlik',
+    'Turizm',
+    'Yazılım Geliştirme',
+    'İş Geliştirme',
+    'Kişisel Gelişim',
+    'Sanat ve Yaratıcılık',
+    'Sosyal Medya Yönetimi',
+    'Finansal Okuryazarlık',
+    'Dijital Pazarlama',
+    'Spor ve Fitness',
+    'Psikoloji ve Zihin Sağlığı',
   ];
 
   String? _selectedTheme;
@@ -35,6 +40,16 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
   int _weekCount = 1;
   int _dailyHours = 1;
   bool _isLoading = false;
+  
+  // Loading dialog için değişkenler
+  int _currentStep = 0;
+  double _progress = 0.0;
+  final List<String> _loadingSteps = [
+    'Yapay zeka ile iletişime geçiliyor...',
+    'Hedefiniz analiz ediliyor...',
+    'Kişiselleştirilmiş plan oluşturuluyor...',
+    'Plan detaylandırılıyor...'
+  ];
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -496,7 +511,7 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
               ),
             ),
             child: _isLoading
-                ? Row(
+                ? const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
@@ -507,8 +522,8 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                           strokeWidth: 2,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      const Text(
+                      SizedBox(width: 12),
+                      Text(
                         'Plan Oluşturuluyor...',
                         style: TextStyle(
                           fontSize: 16,
@@ -517,15 +532,15 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
                       ),
                     ],
                   )
-                : Row(
+                : const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.auto_awesome,
                         size: 24,
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
+                      SizedBox(width: 8),
+                      Text(
                         'AI ile Plan Oluştur',
                         style: TextStyle(
                           fontSize: 16,
@@ -545,7 +560,12 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
 
     setState(() {
       _isLoading = true;
+      _currentStep = 0;
+      _progress = 0.0;
     });
+
+    // Loading dialog'unu göster
+    _showLoadingDialog();
 
     try {
       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
@@ -559,11 +579,19 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
         'daily_time': '$_dailyHours saat',
       };
 
+      // İlerleme simülasyonu
+      await _simulateProgress();
+
       final response = await chatProvider.generatePlan(planRequest);
+
+      // Dialog'u kapat
+      if (mounted) {
+        Navigator.pop(context);
+      }
 
       if (mounted) {
         if (response['success'] == true) {
-          Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PlanResultScreen(
@@ -572,11 +600,21 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
               ),
             ),
           );
+          
+          // Plan oluşturulduysa home screen'e true döndür
+          if (result == true || result == null) {
+            Navigator.pop(context, true);
+          }
         } else {
           _showErrorDialog('Plan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
         }
       }
     } catch (e) {
+      // Dialog'u kapat
+      if (mounted) {
+        Navigator.pop(context);
+      }
+      
       if (mounted) {
         _showErrorDialog('Bağlantı hatası: ${e.toString()}');
       }
@@ -587,6 +625,233 @@ class _PlanCreationScreenState extends State<PlanCreationScreen>
         });
       }
     }
+  }
+
+  Future<void> _simulateProgress() async {
+    const stepDuration = Duration(milliseconds: 2000); // Her adım 2 saniye
+    
+    for (int i = 0; i < _loadingSteps.length; i++) {
+      setState(() {
+        _currentStep = i;
+        _progress = (i + 1) / _loadingSteps.length * 0.9; // %90'a kadar
+      });
+      
+      if (i < _loadingSteps.length - 1) {
+        await Future.delayed(stepDuration);
+      }
+    }
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              // Dialog state'ini güncellemek için dinleyici
+              Future.microtask(() {
+                if (mounted) {
+                  setDialogState(() {});
+                }
+              });
+
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        themeProvider.seedColor.withOpacity(0.05),
+                        Colors.white,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Ana icon
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: themeProvider.seedColor,
+                          borderRadius: BorderRadius.circular(50),
+                          boxShadow: [
+                            BoxShadow(
+                              color: themeProvider.seedColor.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Başlık
+                      Text(
+                        'Planınız Oluşturuluyor',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: themeProvider.seedColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      // Alt başlık
+                      Text(
+                        'AI size özel bir plan hazırlıyor...',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Circular Progress Indicator
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: CircularProgressIndicator(
+                              value: _progress,
+                              strokeWidth: 6,
+                              backgroundColor: themeProvider.seedColor.withOpacity(0.2),
+                              color: themeProvider.seedColor,
+                            ),
+                          ),
+                          Text(
+                            '${(_progress * 100).toInt()}%',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: themeProvider.seedColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Linear Progress Bar
+                      Container(
+                        width: double.infinity,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: themeProvider.seedColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: _progress,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  themeProvider.seedColor,
+                                  themeProvider.seedColor.withOpacity(0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Adım indicator
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: themeProvider.seedColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: themeProvider.seedColor.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: themeProvider.seedColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${_currentStep + 1}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _currentStep < _loadingSteps.length 
+                                    ? _loadingSteps[_currentStep]
+                                    : 'Tamamlanıyor...',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: themeProvider.seedColor.withOpacity(0.8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // İptal butonu (opsiyonel)
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        },
+                        child: Text(
+                          'İptal',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   void _showErrorDialog(String message) {
