@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pusulam_mobile/providers/chat_provider.dart';
+import 'package:pusulam_mobile/providers/theme_provider.dart';
 import 'package:pusulam_mobile/widgets/chat_widget.dart';
 import 'package:pusulam_mobile/widgets/message_input.dart';
+import 'package:pusulam_mobile/widgets/theme_selector.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -70,6 +72,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: _testConnection,
             tooltip: 'Bağlantıyı Test Et',
           ),
+          IconButton(
+            icon: const Icon(Icons.palette),
+            onPressed: _showThemeDialog,
+            tooltip: 'Tema Ayarları',
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               switch (value) {
@@ -111,6 +118,97 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(child: ChatWidget()),
           MessageInput(),
         ],
+      ),
+    );
+  }
+
+  void _showThemeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.palette),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Tema Ayarları',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+                  return Column(
+                    children: [
+                      ThemeSelector(
+                        currentTheme: themeProvider.seedColor,
+                        onThemeChanged: (color) {
+                          themeProvider.setSeedColor(color);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.brightness_6),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Karanlık Mod',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const Spacer(),
+                          Switch(
+                            value: themeProvider.themeMode == ThemeMode.dark,
+                            onChanged: (value) {
+                              themeProvider.setThemeMode(
+                                value ? ThemeMode.dark : ThemeMode.light,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          themeProvider.useSystemTheme();
+                        },
+                        icon: const Icon(Icons.phone_android),
+                        label: const Text('Sistem Temasını Kullan'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () {
+                          themeProvider.resetToDefault();
+                        },
+                        icon: const Icon(Icons.restore),
+                        label: const Text('Varsayılana Sıfırla'),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

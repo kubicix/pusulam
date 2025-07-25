@@ -38,11 +38,14 @@ dependencies:
   # HTTP istekleri için
   http: ^1.1.0
   
+  # State management
+  provider: ^6.1.1
+  
+  # Local storage
+  shared_preferences: ^2.2.2
+  
   # JSON serialization için
   json_annotation: ^4.8.1
-  
-  # State management için
-  provider: ^6.1.1
   
   # Loading gösterimi için
   flutter_spinkit: ^5.2.0
