@@ -1,3 +1,5 @@
+<img width="3780" height="1890" alt="PUSULAM(2)" src="https://github.com/user-attachments/assets/bc6f7516-0e05-46fa-8555-afb452601f28" />
+
 # Pusulam - AI Destekli Plan Oluşturucu
 
 Gemini AI ile kişiselleştirilmiş planlar oluşturan cross-platform uygulama.
