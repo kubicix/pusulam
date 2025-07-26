@@ -1,3 +1,5 @@
+<img width="3780" height="1890" alt="PUSULAM(2)" src="https://github.com/user-attachments/assets/56401d38-2c8c-4216-80cf-bd3f926f979d" />
+
 # 🏆 Pusulam - AI Destekli Plan Oluşturucu
 *BTK Akademi Hackathon 2025 Yarışması Projesi*
 
